@@ -5,7 +5,6 @@ use knapsack_utils::{
     SearchResult,
     // sum_weights,
     sum_values,
-    sort_by_density,
 };
 
 fn branch_and_bound_helper(
@@ -83,9 +82,8 @@ fn branch_and_bound_helper(
 
 pub fn branch_and_bound(items: &[Item], limit_weight: usize) -> Result<SearchResult, ()> {
     let path = vec![];
-    let density_sorted_items: Vec<Item> = sort_by_density(items);
     return branch_and_bound_helper(
-        &density_sorted_items,
+        items,
         0, // i = 0 (start at the first item)
         limit_weight,
         0, // weight = 0 (Weight of current path)
