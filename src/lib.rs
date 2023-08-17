@@ -27,16 +27,15 @@ fn branch_and_bound_helper(
         return Ok(r);
     }
 
-    let mut left: Result<SearchResult, ()> = Err(());
     let remaining_items = &items[i..];
     let remaining_value = sum_values(remaining_items);
-    if value + remaining_value > max_value {
+    let left: Result<SearchResult, ()> = if value + remaining_value > max_value {
         // Try with item[i]
         // Make a new copy of the immutable path argument that has `i` appended.
         let mut lpath: Vec<usize> = path.to_vec();
         lpath.push(i);
         let item = &items[i];
-        left = branch_and_bound_helper(
+        branch_and_bound_helper(
             items,
             i + 1,
             limit_weight,
@@ -44,20 +43,23 @@ fn branch_and_bound_helper(
             value + item.value,
             //max_weight.clone(),
             max_value,
-            &lpath);
+            &lpath)
 
-        match left {
-            Ok(ref t) => { max_value = max(max_value, t.2); }
-            Err(_) => {},
-        }
+    }
+    else {
+        Err(())
+    };
+
+    match left {
+        Ok(ref t) => { max_value = max(max_value, t.2); }
+        Err(_) => {},
     }
 
-    let mut right: Result<SearchResult, ()> = Err(());
     let remaining_items = &items[i+1..];
     let remaining_value = sum_values(remaining_items);
-    if value + remaining_value > max_value {
+    let right: Result<SearchResult, ()> = if value + remaining_value > max_value {
         // Try without item[i]
-        right = branch_and_bound_helper(
+        branch_and_bound_helper(
             items,
             i + 1,
             limit_weight,
@@ -65,8 +67,11 @@ fn branch_and_bound_helper(
             value,
             //max_weight,
             max_value,
-            path);
+            path)
     }
+    else {
+        Err(())
+    };
 
     // Which is better?
     match (left, right) {
